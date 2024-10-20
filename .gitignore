@@ -23,3 +23,6 @@ go.work.sum
 
 # Ignore JetBrains IDE project files
 .idea/
+
+# Ignore environment file
+.env

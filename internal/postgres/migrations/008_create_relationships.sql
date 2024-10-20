@@ -31,7 +31,7 @@ ALTER TABLE IF EXISTS public.recurring_expenses
 
 
 ALTER TABLE IF EXISTS public.credit_card_expenses
-    ADD CONSTRAINT expense_id FOREIGN KEY (expense_id)
+    ADD CONSTRAINT card_expense_id FOREIGN KEY (expense_id)
         REFERENCES public.expenses ("ID") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
