@@ -27,7 +27,7 @@ services:
   app:
     build: .
     ports:
-      - 8080:8080
+      - 8000:8000
     environment:
       MBP_PG_NAME: ${MBP_PG_NAME}
       MBP_PG_USER: ${MBP_PG_USER}
