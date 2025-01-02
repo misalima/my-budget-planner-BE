@@ -1,12 +1,16 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"my-budget-planner/cmd/app/handlers"
 	"my-budget-planner/cmd/app/router"
 	"my-budget-planner/internal/postgres"
 	"my-budget-planner/internal/services"
+	"os"
 )
 
 func main() {
@@ -18,7 +22,11 @@ func main() {
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-CSRF-Token"},
 	}))
-	connStr := "user=postgres dbname=mbp_pg_db password=12345678 port=5432 host=localhost sslmode=disable"
+	connStr, err := loadEnv()
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
 	pool, err := postgres.ConnectDB(connStr)
 	if err != nil {
 		e.Logger.Fatal(err)
@@ -33,4 +41,22 @@ func main() {
 	router.LoadRoutes(e, userHandler)
 	e.Logger.Fatal(e.Start(":8000"))
 
+}
+
+func loadEnv() (string, error) {
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		return "", errors.New("Error loading .env file")
+	}
+
+	connStr := fmt.Sprintf(
+		"user=%s dbname=%s password=%s port=%s host=%s sslmode=disable",
+		os.Getenv("MBP_PG_USER"),
+		os.Getenv("MBP_PG_NAME"),
+		os.Getenv("MBP_PG_PASSWORD"),
+		os.Getenv("MBP_PG_PORT"),
+		os.Getenv("MBP_PG_HOST"),
+	)
+
+	return connStr, nil
 }
