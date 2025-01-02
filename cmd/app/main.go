@@ -18,7 +18,7 @@ func main() {
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-CSRF-Token"},
 	}))
-	connStr := "user=postgres dbname=mbp_pg_db password=12345678 port=5432 host=db sslmode=disable"
+	connStr := "user=postgres dbname=mbp_pg_db password=12345678 port=5432 host=localhost sslmode=disable"
 	pool, err := postgres.ConnectDB(connStr)
 	if err != nil {
 		e.Logger.Fatal(err)
