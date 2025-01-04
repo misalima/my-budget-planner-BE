@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 	"my-budget-planner/internal/postgres/models"
 	"my-budget-planner/internal/services"
 	"net/http"
@@ -32,15 +31,6 @@ func (h *UserHandler) CreateUserHandler(ctx echo.Context) error {
 	if user.Username == "" || user.FirstName == "" || user.LastName == "" || user.Email == "" || user.Password == "" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "All fields (username, first_name, last_name, email, and password) are required"})
 	}
-
-	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash password"})
-	}
-
-	// Replace the password in the user struct with the hashed password
-	user.Password = string(hashedPassword)
 
 	//call the service
 	if err := h.UserService.RegisterUser(&user); err != nil {

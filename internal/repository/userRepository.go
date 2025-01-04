@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"my-budget-planner/internal/postgres/models"
-	"time"
 )
 
 // UserRepository is a struct that defines the repository for the user
@@ -22,10 +21,10 @@ func NewUserRepository(Conn *pgxpool.Pool) *UserRepository {
 
 func (u UserRepository) CreateUser(ctx context.Context, user *models.User) error {
 
-	sql := `INSERT INTO users (username, first_name, last_name, email, password_hash, income, expenditure_limit, created_at, updated_at) 
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	sql := `INSERT INTO users (username, first_name, last_name, email, password_hash) 
+			VALUES ($1, $2, $3, $4, $5)`
 	log.Print("Executing query")
-	tag, err := u.Conn.Exec(ctx, sql, user.Username, user.FirstName, user.LastName, user.Email, user.Password, 0.0, 0.0, time.Now(), time.Now())
+	tag, err := u.Conn.Exec(ctx, sql, user.Username, user.FirstName, user.LastName, user.Email, user.Password)
 	if err != nil {
 		return err
 	}
@@ -47,6 +46,7 @@ func (u UserRepository) GetUserByEmail(ctx context.Context, email string) (*mode
 		}
 		return nil, err
 	}
+	user.Password = ""
 
 	return user, nil
 }
