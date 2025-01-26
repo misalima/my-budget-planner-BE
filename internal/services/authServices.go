@@ -62,10 +62,10 @@ func (s *AuthService) RefreshToken(token string) (string, error) {
 		return "", err
 	}
 
-	newAcessToken, err := auth.GenerateAccessToken(refreshToken.UserID)
+	newAccessToken, err := auth.GenerateAccessToken(refreshToken.UserID)
 	if err != nil {
 		return "", err
 	}
 
-	return newAcessToken, nil
+	return newAccessToken, nil
 }
