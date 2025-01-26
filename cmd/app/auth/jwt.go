@@ -2,13 +2,14 @@ package auth
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"os"
 	"time"
 )
 
-func GenerateAccessToken(userID string) (string, error) {
+func GenerateAccessToken(userID uuid.UUID) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":     "my-budget-planner",
@@ -23,7 +24,7 @@ func GenerateAccessToken(userID string) (string, error) {
 	return accessTokenString, nil
 }
 
-func GenerateRefreshToken(userID string) (string, error) {
+func GenerateRefreshToken(userID uuid.UUID) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":     "my-budget-planner",

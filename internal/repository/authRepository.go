@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"my-budget-planner/internal/postgres/models"
 	"time"
@@ -15,7 +16,7 @@ func NewAuthRepository(Conn *pgxpool.Pool) *AuthRepository {
 	return &AuthRepository{Conn: Conn}
 }
 
-func (a *AuthRepository) StoreRefreshToken(ctx context.Context, userId, refreshToken string) error {
+func (a *AuthRepository) StoreRefreshToken(ctx context.Context, userId uuid.UUID, refreshToken string) error {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	createdAt := time.Now()
 

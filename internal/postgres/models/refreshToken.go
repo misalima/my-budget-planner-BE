@@ -1,10 +1,13 @@
 package models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type RefreshToken struct {
-	ID        string    `db:"id" json:"id"`
-	UserID    string    `db:"user_id" json:"user_id"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	UserID    uuid.UUID `db:"user_id" json:"user_id"`
 	Token     string    `db:"token" json:"token"`
 	ExpiresAt time.Time `db:"expires_at" json:"expires_at"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`

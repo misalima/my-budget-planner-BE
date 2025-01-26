@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 	"my-budget-planner/cmd/app/auth"
 	"my-budget-planner/internal/postgres/models"
 	"my-budget-planner/internal/repository"
@@ -11,26 +13,70 @@ import (
 )
 
 type AuthService struct {
-	repo *repository.AuthRepository
+	authRepo *repository.AuthRepository
+	userRepo *repository.UserRepository
 }
 
 func NewAuthService(pool *pgxpool.Pool) *AuthService {
-	return &AuthService{repo: repository.NewAuthRepository(pool)}
+	return &AuthService{
+		authRepo: repository.NewAuthRepository(pool),
+		userRepo: repository.NewUserRepository(pool),
+	}
+}
+
+// Login logs the user generating a new access token
+func (s *AuthService) Login(email, password string) (string, string, error) {
+	//check if the user exists
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid email or password")
+	}
+
+	//check if the password is correct
+	err = s.CheckPasswords(password, user.Password)
+	if err != nil {
+		return "", "", err
+	}
+
+	//generate access token
+	accessToken, err := auth.GenerateAccessToken(user.ID)
+	if err != nil {
+		return "", "", err
+	}
+
+	//generate refresh token
+	refreshToken, err := auth.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return "", "", err
+	}
+
+	//save refresh token
+	err = s.SaveRefreshToken(user.ID, refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	//return access token and refresh token
+	return accessToken, refreshToken, nil
+
 }
 
 // SaveRefreshToken saves the refresh token in the database
-func (s *AuthService) SaveRefreshToken(userId, refreshToken string) error {
+func (s *AuthService) SaveRefreshToken(userId uuid.UUID, refreshToken string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return s.repo.StoreRefreshToken(ctx, userId, refreshToken)
+	return s.authRepo.StoreRefreshToken(ctx, userId, refreshToken)
 }
 
 // ValidateRefreshToken returns the refresh token is valid and has not expired, or an empty token otherwise
-func (s *AuthService) ValidateRefreshToken(ctx context.Context, userId, token string) (models.RefreshToken, error) {
+func (s *AuthService) ValidateRefreshToken(ctx context.Context, userId uuid.UUID, token string) (models.RefreshToken, error) {
 
-	refreshToken, err := s.repo.GetRefreshToken(ctx, token)
+	refreshToken, err := s.authRepo.GetRefreshToken(ctx, token)
 	if err != nil {
 		return refreshToken, fmt.Errorf("invalid refresh token")
 	}
@@ -54,11 +100,11 @@ func (s *AuthService) DeleteRefreshToken(token string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return s.repo.DeleteRefreshToken(ctx, token)
+	return s.authRepo.DeleteRefreshToken(ctx, token)
 }
 
 // RefreshToken validates refresh token and refreshes the access token
-func (s *AuthService) RefreshToken(userId, token string) (string, error) {
+func (s *AuthService) RefreshToken(userId uuid.UUID, token string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -73,4 +119,12 @@ func (s *AuthService) RefreshToken(userId, token string) (string, error) {
 	}
 
 	return newAccessToken, nil
+}
+
+func (s *AuthService) CheckPasswords(password, hashedPassword string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return fmt.Errorf("invalid email or password")
+	}
+	return nil
 }
