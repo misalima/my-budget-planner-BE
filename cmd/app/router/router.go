@@ -14,5 +14,6 @@ func LoadRoutes(e *echo.Echo, userHandler *handlers.UserHandler, authHandler *ha
 	e.POST("/user", userHandler.CreateUserHandler)
 
 	//auth routes
+	e.POST("/auth/login", authHandler.Login)
 	e.GET("/auth/refresh", authHandler.RefreshTokenHandler)
 }

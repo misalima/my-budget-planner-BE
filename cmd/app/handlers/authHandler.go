@@ -39,7 +39,7 @@ func (a *AuthHandler) RefreshTokenHandler(ctx echo.Context) error {
 	//extract user id data from the jwt token
 	userId, err := uuid.Parse(ctx.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["user_id"].(string))
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user"})
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user"})
 	}
 
 	//call the service
