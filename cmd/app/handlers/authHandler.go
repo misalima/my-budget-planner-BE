@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"my-budget-planner/internal/postgres/models"
 	"my-budget-planner/internal/services"
@@ -10,6 +11,11 @@ import (
 
 type AuthHandler struct {
 	AuthService *services.AuthService
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func NewAuthHandler(authService *services.AuthService) *AuthHandler {
@@ -31,7 +37,10 @@ func (a *AuthHandler) RefreshTokenHandler(ctx echo.Context) error {
 	}
 
 	//extract user id data from the jwt token
-	userId := ctx.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["user_id"].(string)
+	userId, err := uuid.Parse(ctx.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["user_id"].(string))
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user"})
+	}
 
 	//call the service
 	accessToken, err := a.AuthService.RefreshToken(userId, refreshToken.Token)
@@ -41,4 +50,23 @@ func (a *AuthHandler) RefreshTokenHandler(ctx echo.Context) error {
 
 	//handle the response
 	return ctx.JSON(http.StatusOK, map[string]string{"access_token": accessToken})
+}
+
+func (a *AuthHandler) Login(ctx echo.Context) error {
+	var req LoginRequest
+
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+	}
+
+	if req.Email == "" || req.Password == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Email and password are required"})
+	}
+
+	accessToken, refreshToken, err := a.AuthService.Login(req.Email, req.Password)
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"access_token": accessToken, "refresh_token": refreshToken})
 }
