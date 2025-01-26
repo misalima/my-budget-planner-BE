@@ -28,11 +28,16 @@ func (s *AuthService) SaveRefreshToken(userId, refreshToken string) error {
 }
 
 // ValidateRefreshToken returns the refresh token is valid and has not expired, or an empty token otherwise
-func (s *AuthService) ValidateRefreshToken(ctx context.Context, token string) (models.RefreshToken, error) {
+func (s *AuthService) ValidateRefreshToken(ctx context.Context, userId, token string) (models.RefreshToken, error) {
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, token)
 	if err != nil {
 		return refreshToken, fmt.Errorf("invalid refresh token")
+	}
+
+	//checks if the token belongs to the request user
+	if refreshToken.UserID != userId {
+		return refreshToken, fmt.Errorf("refresh token doesnt belong to requesting user")
 	}
 
 	//checks if the token has expired
@@ -53,11 +58,11 @@ func (s *AuthService) DeleteRefreshToken(token string) error {
 }
 
 // RefreshToken validates refresh token and refreshes the access token
-func (s *AuthService) RefreshToken(token string) (string, error) {
+func (s *AuthService) RefreshToken(userId, token string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	refreshToken, err := s.ValidateRefreshToken(ctx, token)
+	refreshToken, err := s.ValidateRefreshToken(ctx, userId, token)
 	if err != nil {
 		return "", err
 	}
