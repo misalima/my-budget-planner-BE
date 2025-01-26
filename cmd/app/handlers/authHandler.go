@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"my-budget-planner/internal/postgres/models"
 	"my-budget-planner/internal/services"
@@ -29,8 +30,11 @@ func (a *AuthHandler) RefreshTokenHandler(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Token is required"})
 	}
 
+	//extract user id data from the jwt token
+	userId := ctx.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["user_id"].(string)
+
 	//call the service
-	accessToken, err := a.AuthService.RefreshToken(refreshToken.Token)
+	accessToken, err := a.AuthService.RefreshToken(userId, refreshToken.Token)
 	if err != nil {
 		return ctx.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}
