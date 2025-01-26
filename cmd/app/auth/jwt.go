@@ -8,19 +8,34 @@ import (
 	"time"
 )
 
-func GenerateJWT(userID string) (string, error) {
+func GenerateAccessToken(userID string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":     "my-budget-planner",
 		"sub":     userID,
 		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+		"exp":     time.Now().Add(time.Minute * 15).Unix(),
 	})
-	tokenString, err := token.SignedString([]byte(secret))
+	accessTokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return "", err
 	}
-	return tokenString, nil
+	return accessTokenString, nil
+}
+
+func GenerateRefreshToken(userID string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss":     "my-budget-planner",
+		"sub":     userID,
+		"user_id": userID,
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), // 7 days expiration
+	})
+	refreshTokenString, err := refreshToken.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+	return refreshTokenString, nil
 }
 
 func JWTMiddleware() echo.MiddlewareFunc {
