@@ -6,11 +6,11 @@ import (
 )
 
 type User struct {
-	ID               uuid.UUID `db:"id" json:"id"`
+	ID               uuid.UUID `db:"ID" json:"id"`
 	Username         string    `db:"username" json:"username"`
 	FirstName        string    `db:"first_name" json:"first_name"`
 	LastName         string    `db:"last_name" json:"last_name"`
-	Password         string    `db:"password" json:"password"`
+	Password         string    `db:"password_hash" json:"password"`
 	Email            string    `db:"email" json:"email"`
 	ProfilePicture   string    `db:"profile_picture" json:"profile_picture"`
 	Income           float64   `db:"income" json:"income"`

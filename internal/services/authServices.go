@@ -34,6 +34,7 @@ func (s *AuthService) Login(email, password string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("invalid email or password")
 	}
+	fmt.Printf("user email: %s \n user first_name: %s \n, user password: %s\n", user.Email, user.FirstName, user.Password)
 
 	//check if the password is correct
 	err = s.CheckPasswords(password, user.Password)
