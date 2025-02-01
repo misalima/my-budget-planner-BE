@@ -36,17 +36,18 @@ func (u UserRepository) CreateUser(ctx context.Context, user *models.User) error
 }
 
 func (u UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-
-	sql := `SELECT * FROM users WHERE email = $1`
+	sql := `SELECT "ID", username, first_name, last_name, password_hash, email, profile_picture, income, expenditure_limit, created_at, updated_at FROM users WHERE email = $1`
 	user := &models.User{}
-	err := u.Conn.QueryRow(context.Background(), sql, email).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Password, &user.Email, &user.ProfilePicture, &user.Income, &user.ExpenditureLimit, &user.CreatedAt, &user.UpdatedAt)
+	err := u.Conn.QueryRow(ctx, sql, email).Scan(
+		&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Password, &user.Email,
+		&user.ProfilePicture, &user.Income, &user.ExpenditureLimit, &user.CreatedAt, &user.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	user.Password = ""
 
 	return user, nil
 }
