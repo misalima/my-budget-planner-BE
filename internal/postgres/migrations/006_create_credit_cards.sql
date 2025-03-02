@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS credit_cards
     updated_at timestamp with time zone NOT NULL,
     PRIMARY KEY ("ID")
 );
+
 ---- create above / drop below ----
 
 DROP TABLE IF EXISTS credit_cards;
