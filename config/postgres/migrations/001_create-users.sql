@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS users
 (
     "ID" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -6,12 +5,12 @@ CREATE TABLE IF NOT EXISTS users
     username character varying(255) NOT NULL,
     first_name character varying(255) NOT NULL,
     last_name character varying(255) NOT NULL,
-    password_hash character(60) NOT NULL,
-    profile_picture character varying(255) DEFAULT NULL,
-    income double precision DEFAULT NULL,
-    expenditure_limit double precision DEFAULT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    password_hash character(255) NOT NULL,
+    profile_picture character varying(255) NOT NULL DEFAULT '',
+    income double precision NOT NULL DEFAULT 0,
+    expenditure_limit double precision NOT NULL DEFAULT 0,
+    created_at timestamp with time zone NOT NULL DEFAULT NOW(),
+    updated_at timestamp with time zone NOT NULL DEFAULT NOW(),
     PRIMARY KEY ("ID")
 );
 ---- create above / drop below ----
