@@ -39,8 +39,10 @@ func main() {
 	userHandler := handlers.NewUserHandler(userServices)
 	authServices := services.NewAuthService(pool)
 	authHandler := handlers.NewAuthHandler(authServices)
+	categoryServices := services.NewCategoryServices(pool)
+	categoryHandler := handlers.NewCategoryHandler(categoryServices)
 
-	router.LoadRoutes(e, userHandler, authHandler)
+	router.LoadRoutes(e, userHandler, authHandler, categoryHandler)
 	e.Logger.Fatal(e.Start(":8000"))
 
 }
