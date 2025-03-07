@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"net/http"
 	"os"
 	"time"
 )
@@ -42,5 +43,8 @@ func GenerateRefreshToken(userID uuid.UUID) (string, error) {
 func JWTMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		SigningKey: []byte(os.Getenv("JWT_SECRET")),
+		ErrorHandler: func(c echo.Context, err error) error {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Access Denied: authenticate to get access to this functionality"})
+		},
 	})
 }
